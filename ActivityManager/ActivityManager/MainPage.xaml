@@ -1,23 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="ActivityManager.MainPage">
+             x:Class="ActivityManager.MainPage"
+             xmlns:view="clr-namespace:ActivityManager.Views"
+             >
 
-    <AbsoluteLayout x:Name="absoluteLayout" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="Beige">
-        <StackLayout x:Name="underlay" BackgroundColor="Aqua" AbsoluteLayout.LayoutBounds="0.5,0.5,100,100" AbsoluteLayout.LayoutFlags="PositionProportional">
-            <Label  Text="00:00" HorizontalOptions="Start"/>
-
-            <ContentView x:Name="container">
-
-
-                <Label x:Name="label"  Text="00:00" HorizontalOptions="Start"/>
-
-            </ContentView>
-            <Label   Text="00:00" HorizontalOptions="Start"/>
-            <Label Text="00:00"/>
-        </StackLayout>
-        <StackLayout x:Name="overlay"/>
-
-    </AbsoluteLayout>
+    <ContentPage.Content>
+        <ScrollView>
+        <view:ActivityManagerView/>
+        </ScrollView>
+    </ContentPage.Content>
 
 </ContentPage>

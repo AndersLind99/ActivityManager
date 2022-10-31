@@ -1,6 +1,4 @@
-﻿using System;
-using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
+﻿using Xamarin.Forms;
 
 namespace ActivityManager
 {
@@ -11,6 +9,12 @@ namespace ActivityManager
             InitializeComponent();
 
             MainPage = new MainPage();
+            //var activityManagerView = new Views.ActivityManagerView();
+            //var activtiyManagerViewModel = new ViewModels.ActivityManagerViewModel();
+            
+            //activityManagerView.BindingContext = activtiyManagerViewModel;
+
+          
         }
 
         protected override void OnStart()
