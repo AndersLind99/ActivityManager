@@ -11,46 +11,15 @@
     </ContentView.BindingContext>
     <ContentView.Content>
 
-        <AbsoluteLayout x:Name="absoluteLayout" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="Beige">
+        <AbsoluteLayout x:Name="absoluteLayout" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand" BackgroundColor="Beige"  >
 
 
-            <StackLayout x:Name="underlay" BackgroundColor="Aqua" AbsoluteLayout.LayoutBounds="0,1,100,750" AbsoluteLayout.LayoutFlags="PositionProportional" VerticalOptions="StartAndExpand">
-                <StackLayout x:Name="TimeStamps" BindableLayout.ItemsSource="{Binding TimeStamps}" HorizontalOptions="Center" Spacing="5">
-                    <BindableLayout.ItemTemplate>
-
-                        <DataTemplate>
-
-                            <StackLayout>
-
-                                <Label x:Name="label"  Text="{Binding .}"/>
-                                <Label Text="--------" Rotation="90"/>
-
-                            </StackLayout>
-
-                        </DataTemplate>
+            <StackLayout x:Name="underlay" BackgroundColor="GreenYellow"  AbsoluteLayout.LayoutBounds="0,0,1,1" AbsoluteLayout.LayoutFlags="All">
 
 
-
-
-                    </BindableLayout.ItemTemplate>
-                </StackLayout>
-
-
-
-
-
-
-
-
-
-
-                <StackLayout x:Name="overlay">
-                    <ContentView x:Name="container">
-                        <Label x:Name="label"/>
-                    </ContentView>
-
-                </StackLayout>
             </StackLayout>
+
+            <Button BackgroundColor="Yellow" BorderColor="Black" Command="{Binding ButtonPressedCommand}"/>
 
         </AbsoluteLayout>
 
