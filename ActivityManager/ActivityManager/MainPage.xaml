@@ -3,12 +3,16 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="ActivityManager.MainPage"
              xmlns:view="clr-namespace:ActivityManager.Views"
+             xmlns:controls="clr-namespace:ActivityManager.Controls"
              >
 
     <ContentPage.Content>
-        <ScrollView>
-        <view:ActivityManagerView/>
-        </ScrollView>
+        <ContentView>
+            <controls:ActivityManagerTimeline/>
+
+        </ContentView>
+
+
     </ContentPage.Content>
 
 </ContentPage>
