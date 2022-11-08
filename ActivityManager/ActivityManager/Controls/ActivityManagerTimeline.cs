@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO.Pipes;
 using System.Net.Mime;
 using System.Text;
 using System.Windows.Input;
 using System.Xml.Linq;
 using Xamarin.Forms;
+
 
 namespace ActivityManager.Controls
 {
@@ -42,17 +44,15 @@ namespace ActivityManager.Controls
 
         #region commands
 
-        public ICommand ButtonPressedCommand
+        public ICommand ButtonAddPressedCommand
+        {
+            get; private set;
+        }public ICommand ButtonRemovePressedCommand
         {
             get; private set;
         }
+
         #endregion
-
-        private ObservableCollection<string> Timestamps
-        {
-            get; set;
-        }
-
 
         AbsoluteLayout absoluteLayout;
 
@@ -65,14 +65,16 @@ namespace ActivityManager.Controls
         {
 
 
-            ButtonPressedCommand = new Command(() => ButtonPressed());
+            ButtonAddPressedCommand = new Command(() => AddButtonPressed());
+            ButtonRemovePressedCommand = new Command(() => RemoveButtonPressed());
 
             // TODO: MOVE VIEWMODEL & CODE BEHIND TO THIS CONTROL!!!!
             CreateDefaultContentPage();
             DefaultTimestamps();
-
+            ActivityTimeline = ActivityTimeline;
 
             Content = absoluteLayout;
+
         }
 
 
@@ -125,11 +127,15 @@ namespace ActivityManager.Controls
 
 
                     new Button {
-                    BorderColor = Color.Black,
+                        BorderColor = Color.Black,
                         BackgroundColor = Color.Blue,
-                        Command = ButtonPressedCommand, AnchorX = 10 }
+                        Command = ButtonAddPressedCommand, TranslationX = 100, TranslationY = 730 },
 
-                }
+                    new Button { BorderColor = Color.Black, Command = ButtonRemovePressedCommand, TranslationX = 200, TranslationY = 730
+
+                    } }
+
+
 
 
 
@@ -139,24 +145,16 @@ namespace ActivityManager.Controls
 
 
 
-
         }
 
-        private void ButtonPressed()
+        private void AddButtonPressed()
         {
-
-            var buttonPressedLabel = new Label { Text = "you pressed the button" };
             ActivityTimeline.Add("hihihi");
-
-
-
-
-
-
         }
-
-
-
+        private void RemoveButtonPressed()
+        {
+            ActivityTimeline.Clear();
+        }
         private void DefaultTimestamps()
         {
 
