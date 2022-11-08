@@ -8,7 +8,7 @@
 
     <ContentPage.Content>
         <ContentView>
-            <controls:ActivityManagerTimeline/>
+            <controls:ActivityManagerTimeline ActivityTimeline="{Binding ActivityTimeline}" />
 
         </ContentView>
 
