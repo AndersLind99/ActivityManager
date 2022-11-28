@@ -17,18 +17,6 @@ using Xamarin.Forms.Xaml;
 
 namespace ActivityManager.Controls
 {
-    public class ActivityTimestampAndStuff : ContentView
-    {
-        public ObservableCollection<TimeSpan> Timestamps
-        {
-            get; set;
-        }
-        public ObservableCollection<ActivityModel> Activities
-        {
-            get; set;
-        }
-    }
-
     // TODO: FIX Timeline not showing on launch  (somehow force refresh???)
 
     // change binding to ObservableCollection<ActivityModel>. instead of its own class. timestamps to property inside of managerclass.
@@ -37,8 +25,8 @@ namespace ActivityManager.Controls
         #region bindable properties
         public static readonly BindableProperty ActivityTimelineProperty = BindableProperty.Create(
             nameof(ActivityTimeline),
-            typeof(ActivityTimestampAndStuff),
-            typeof(ActivityTimestampAndStuff),
+            typeof(List<ActivityModel>),
+            typeof(List<ActivityModel>),
             defaultValue: (DummyActivties),
             BindingMode.OneWay,
             propertyChanged: ActivityTimelineChanged
@@ -46,10 +34,7 @@ namespace ActivityManager.Controls
 
         public List<ActivityModel> ActivityTimeline
         {
-            get
-            {
-                return (ActivityTimestampAndStuff)GetValue(ActivityTimelineProperty);
-            }
+            get { return (List<ActivityModel>)GetValue(ActivityTimelineProperty); }
             set
             {
                 SetValue(ActivityTimelineProperty, value);
@@ -71,7 +56,7 @@ namespace ActivityManager.Controls
             var obj = ((ActivityManagerTimeline)bindable);
             if (obj.ActivityTimeline != null)
             {
-                obj.ActivityTimeline = (ActivityTimestampAndStuff)newValue;
+                obj.ActivityTimeline = (List<ActivityModel>)newValue;
             }
         }
 
@@ -81,19 +66,10 @@ namespace ActivityManager.Controls
         #region commands
 
 
-        public ICommand ButtonAddPressedCommand
-        {
-            get; private set;
-        }
-        public ICommand ButtonRemovePressedCommand
-        {
-            get; private set;
-        }
+        public ICommand ButtonAddPressedCommand { get; private set; }
+        public ICommand ButtonRemovePressedCommand { get; private set; }
 
-        public ICommand ButtonResetPressedCommand
-        {
-            get; private set;
-        }
+        public ICommand ButtonResetPressedCommand { get; private set; }
 
         #endregion
 
@@ -109,31 +85,28 @@ namespace ActivityManager.Controls
             ButtonRemovePressedCommand = new Command(() => RemoveButtonPressed());
             ButtonResetPressedCommand = new Command(() => ResetButtonPressed());
 
-
             CreateActivityTimeline();
 
-            
-            Device.BeginInvokeOnMainThread(() => ActivityTimelineChanged(this, null, ActivityTimeline));
+            Device.BeginInvokeOnMainThread(
+                () => ActivityTimelineChanged(this, null, ActivityTimeline)
+            );
         }
 
         public void CreateActivityTimeline()
         {
             // check if layout exists, if it doesn't create basic page structure.
-            ActivityTimeline.Timestamps = new ObservableCollection<TimeSpan>();
-            ActivityTimeline.Timestamps.Clear();
             CreateDefaultContentViewStructure();
-
-            //  CreateTimestamps();
-            SortTimeStamps(CreateHourlyTimestamps());
 
             // clear the children
             underlay.Children.Clear();
             overlay.Children.Clear();
 
-            var maxWidth = GetTimeSlotMaxWidth();
+            var timeSpans = SortTimeStamps(CreateHourlyTimestamps());
+
+            var maxWidth = GetTimeSlotMaxWidth(timeSpans);
             underlay.Children.Clear();
 
-            foreach (var timestamp in ActivityTimeline.Timestamps)
+            foreach (var timestamp in timeSpans)
             {
                 ContentView timeSlot = new ContentView
                 {
@@ -157,11 +130,11 @@ namespace ActivityManager.Controls
             }
         }
 
-        private double GetTimeSlotMaxWidth()
+        private double GetTimeSlotMaxWidth(List<TimeSpan> timespans)
         {
             var maxWidth = new double();
             // foreach for biggest width
-            foreach (var timestamp in ActivityTimeline.Timestamps)
+            foreach (var timestamp in timespans)
             {
                 ContentView timeSlot = new ContentView
                 {
@@ -201,7 +174,7 @@ namespace ActivityManager.Controls
                 VerticalOptions = LayoutOptions.Center
             };
 
-            foreach (var activity in ActivityTimeline.Activities)
+            foreach (var activity in ActivityTimeline)
             {
                 var endtime = (DateTime)activity.EndTime;
                 string endtimeString = endtime.ToString("HH:mm");
@@ -241,45 +214,39 @@ namespace ActivityManager.Controls
             }
         }
 
-        public static ActivityTimestampAndStuff DummyActivties
+        public static List<ActivityModel> DummyActivties
         {
             get
-
-
             {
-                var output = new ActivityTimestampAndStuff()
+                var output = new List<ActivityModel>()
                 {
-                    Activities = new ObservableCollection<ActivityModel>
-            {
-                new ActivityModel
-                {
-                    Name = "badminton",
-                    StartTime = DateTime.Parse("01:00"),
-                    EndTime = DateTime.Parse("03:00")
-                },
-                new ActivityModel
-                {
-                    Name = "tennis",
-                    StartTime = DateTime.Parse("03:20"),
-                    EndTime = DateTime.Parse("04:00")
-                },
-                new ActivityModel
-                {
-                    Name = "chilling",
-                    StartTime = DateTime.Parse("05:07"),
-                    EndTime = DateTime.Parse("06:00")
-                },
-                new ActivityModel
-                {
-                    Name = "lols",
-                    StartTime = DateTime.Parse("12:54"),
-                    EndTime = DateTime.Parse("13:30")
-                },
-            }
+                    new ActivityModel
+                    {
+                        Name = "badminton",
+                        StartTime = DateTime.Parse("01:00"),
+                        EndTime = DateTime.Parse("03:00")
+                    },
+                    new ActivityModel
+                    {
+                        Name = "tennis",
+                        StartTime = DateTime.Parse("03:20"),
+                        EndTime = DateTime.Parse("04:00")
+                    },
+                    new ActivityModel
+                    {
+                        Name = "chilling",
+                        StartTime = DateTime.Parse("05:07"),
+                        EndTime = DateTime.Parse("06:00")
+                    },
+                    new ActivityModel
+                    {
+                        Name = "lols",
+                        StartTime = DateTime.Parse("12:54"),
+                        EndTime = DateTime.Parse("13:30")
+                    },
                 };
 
                 return output;
-        
             }
         }
 
@@ -345,15 +312,12 @@ namespace ActivityManager.Controls
                 }
             };
 
-            //absoluteLayout.Children.Add(underlay);
-            //absoluteLayout.Children.Add(overlay);
-
             Content = absoluteLayout;
         }
 
         private void AddButtonPressed()
         {
-            ActivityTimeline.Activities.Add(
+            ActivityTimeline.Add(
                 new ActivityModel
                 {
                     Name = "test",
@@ -361,7 +325,7 @@ namespace ActivityManager.Controls
                     EndTime = DateTime.Parse("00:55")
                 }
             );
-            ActivityTimeline.Activities.Add(
+            ActivityTimeline.Add(
                 new ActivityModel
                 {
                     Name = "test",
@@ -369,7 +333,7 @@ namespace ActivityManager.Controls
                     EndTime = DateTime.Parse("14:22")
                 }
             );
-            ActivityTimeline.Activities.Add(
+            ActivityTimeline.Add(
                 new ActivityModel
                 {
                     Name = "test",
@@ -383,13 +347,13 @@ namespace ActivityManager.Controls
 
         private void RemoveButtonPressed()
         {
-            ActivityTimeline.Activities.Clear();
+            ActivityTimeline.Clear();
             ActivityTimelineChanged(this, null, ActivityTimeline);
         }
 
         private void ResetButtonPressed()
         {
-            ActivityTimeline.Activities.Clear();
+            ActivityTimeline.Clear();
             var activities2 = new ObservableCollection<ActivityModel>
             {
                 new ActivityModel
@@ -420,7 +384,7 @@ namespace ActivityManager.Controls
 
             foreach (var activity in activities2)
             {
-                ActivityTimeline.Activities.Add(activity);
+                ActivityTimeline.Add(activity);
             }
 
             ActivityTimelineChanged(this, null, ActivityTimeline);
@@ -440,7 +404,7 @@ namespace ActivityManager.Controls
 
         private List<TimeSpan> SortTimeStamps(List<TimeSpan> timeSpans)
         {
-            foreach (var activityTimes in ActivityTimeline.Activities)
+            foreach (var activityTimes in ActivityTimeline)
             {
                 var startTime = TimeSpan.Parse(activityTimes.StartTime.ToString("HH:mm"));
 
@@ -454,7 +418,7 @@ namespace ActivityManager.Controls
             var noDuplicates = timeSpans.Distinct().ToList();
             noDuplicates.Sort((x, y) => TimeSpan.Compare(x, y));
 
-            foreach (var activity in ActivityTimeline.Activities)
+            foreach (var activity in ActivityTimeline)
             {
                 var startTime = TimeSpan.Parse(activity.StartTime.ToString("HH:mm"));
                 var temp = (DateTime)activity.EndTime;
@@ -465,11 +429,11 @@ namespace ActivityManager.Controls
 
                 noDuplicates.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
             }
-            ActivityTimeline.Timestamps.Clear();
+            timeSpans.Clear();
 
             foreach (var timeSpan in noDuplicates)
             {
-                ActivityTimeline.Timestamps.Add(timeSpan);
+                timeSpans.Add(timeSpan);
             }
             return timeSpans;
         }
