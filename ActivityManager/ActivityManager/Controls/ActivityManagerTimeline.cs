@@ -1,25 +1,13 @@
 ﻿using ActivityManager.Models;
-using ActivityManagerDemo.Models;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO.Pipes;
 using System.Linq;
-using System.Net.Mime;
-using System.Security.Cryptography;
-using System.Text;
 using System.Windows.Input;
-using System.Xml.Linq;
 using Xamarin.Forms;
-using Xamarin.Forms.Xaml;
 
 namespace ActivityManager.Controls
 {
-    // TODO: FIX Timeline not showing on launch  (somehow force refresh???)
-
-    // change binding to ObservableCollection<ActivityModel>. instead of its own class. timestamps to property inside of managerclass.
     public class ActivityManagerTimeline : ContentView
     {
         #region bindable properties
@@ -39,11 +27,6 @@ namespace ActivityManager.Controls
             {
                 SetValue(ActivityTimelineProperty, value);
                 CreateActivityTimeline();
-
-                OnPropertyChanged(nameof(underlay));
-                OnPropertyChanged(nameof(overlay));
-                OnPropertyChanged(nameof(absoluteLayout));
-                OnPropertyChanged(nameof(ActivityTimeline));
             }
         }
 
@@ -65,19 +48,11 @@ namespace ActivityManager.Controls
 
         #region commands
 
-
         public ICommand ButtonAddPressedCommand { get; private set; }
         public ICommand ButtonRemovePressedCommand { get; private set; }
-
         public ICommand ButtonResetPressedCommand { get; private set; }
 
         #endregion
-
-        AbsoluteLayout absoluteLayout;
-
-        StackLayout underlay;
-
-        AbsoluteLayout overlay;
 
         public ActivityManagerTimeline()
         {
@@ -95,7 +70,9 @@ namespace ActivityManager.Controls
         public void CreateActivityTimeline()
         {
             // check if layout exists, if it doesn't create basic page structure.
-            CreateDefaultContentViewStructure();
+            AbsoluteLayout absoluteLayout = CreateDefaultContentViewStructure();
+            StackLayout underlay = (StackLayout)absoluteLayout.Children.ElementAt(0);
+            AbsoluteLayout overlay = (AbsoluteLayout)absoluteLayout.Children.ElementAt(1);
 
             // clear the children
             underlay.Children.Clear();
@@ -103,7 +80,7 @@ namespace ActivityManager.Controls
 
             var timeSpans = SortTimeStamps(CreateHourlyTimestamps());
 
-            var maxWidth = GetTimeSlotMaxWidth(timeSpans);
+            var maxWidth = GetTimeSlotMaxWidth(underlay, timeSpans);
             underlay.Children.Clear();
 
             foreach (var timestamp in timeSpans)
@@ -126,11 +103,11 @@ namespace ActivityManager.Controls
                 timeSlot.Content = timeStamp;
                 underlay.Children.Add(timeSlot);
 
-                CreateActivityFrame(timeSlot, maxWidth);
+                CreateActivityFrame(overlay, timeSlot, maxWidth);
             }
         }
 
-        private double GetTimeSlotMaxWidth(List<TimeSpan> timespans)
+        private double GetTimeSlotMaxWidth(StackLayout underlay, List<TimeSpan> timespans)
         {
             var maxWidth = new double();
             // foreach for biggest width
@@ -161,7 +138,11 @@ namespace ActivityManager.Controls
             return maxWidth;
         }
 
-        private void CreateActivityFrame(ContentView timeSlot, double maxWidth)
+        private void CreateActivityFrame(
+            AbsoluteLayout overlay,
+            ContentView timeSlot,
+            double maxWidth
+        )
         {
             var timestamp = (Label)timeSlot.Content;
 
@@ -250,22 +231,22 @@ namespace ActivityManager.Controls
             }
         }
 
-        private void CreateDefaultContentViewStructure()
+        private AbsoluteLayout CreateDefaultContentViewStructure()
         {
-            underlay = new StackLayout()
+            StackLayout underlay = new StackLayout()
             {
                 // BackgroundColor = Color.GreenYellow,
                 IsVisible = true,
-                Opacity = 1
+                Opacity = 1,
             };
             AbsoluteLayout.SetLayoutFlags(underlay, AbsoluteLayoutFlags.All);
             AbsoluteLayout.SetLayoutBounds(underlay, new Rectangle(0.5, 0.5, 1, 1));
 
-            overlay = new AbsoluteLayout() { };
+            AbsoluteLayout overlay = new AbsoluteLayout() { };
             AbsoluteLayout.SetLayoutFlags(overlay, AbsoluteLayout.GetLayoutFlags(underlay));
             AbsoluteLayout.SetLayoutBounds(overlay, AbsoluteLayout.GetLayoutBounds(underlay));
 
-            absoluteLayout = new AbsoluteLayout
+            AbsoluteLayout absoluteLayout = new AbsoluteLayout
             {
                 VerticalOptions = LayoutOptions.FillAndExpand,
                 HorizontalOptions = LayoutOptions.FillAndExpand,
@@ -313,6 +294,7 @@ namespace ActivityManager.Controls
             };
 
             Content = absoluteLayout;
+            return absoluteLayout;
         }
 
         private void AddButtonPressed()
