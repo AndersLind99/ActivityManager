@@ -9,7 +9,7 @@
     <ContentPage.Content>
         <ContentView>
             <ScrollView>
-            <controls:ActivityManagerTimeline ActivityTimeline="{Binding ActivityTimeline}" />
+                <controls:ActivityManagerTimeline  />
             </ScrollView>
         </ContentView>
 
