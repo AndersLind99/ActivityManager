@@ -45,7 +45,7 @@ namespace ActivityManager.Controls
         }
 
         #endregion
-
+        double startTimeSlot;
 
         #region commands
 
@@ -82,34 +82,30 @@ namespace ActivityManager.Controls
             var timeSpans = SortTimeStamps(CreateHourlyTimestamps());
 
             var maxWidth = GetTimeSlotMaxWidth(underlay, timeSpans);
-           
 
             foreach (var timestamp in timeSpans)
             {
                 ContentView timeSlot = new ContentView
                 {
                     HorizontalOptions = LayoutOptions.FillAndExpand,
-                    
                     HeightRequest = 45, // dynamic
-                    
-                  Padding = 0,
-                     BackgroundColor = Color.Yellow
-                    
+                    Padding = 0,
+                    BackgroundColor = Color.Yellow
                 };
 
                 Label timeStamp = new Label
                 {
-                     BackgroundColor = Color.BlueViolet,
+                    BackgroundColor = Color.BlueViolet,
                     HorizontalOptions = LayoutOptions.Start,
                     VerticalOptions = LayoutOptions.End,
                     Text = timestamp.ToString(@"hh\:mm"),
-                    Padding= 0,
+                    Padding = 0,
                 };
                 AbsoluteLayout.SetLayoutFlags(timeStamp, AbsoluteLayoutFlags.None);
                 AbsoluteLayout.SetLayoutBounds(timeStamp, timeSlot.Bounds);
                 timeSlot.Content = timeStamp;
                 underlay.Children.Add(timeSlot);
-             //   Debug.WriteLine(timeSlot.Y);
+                //   Debug.WriteLine(timeSlot.Y);
                 CreateActivityFrame(overlay, timeSlot, maxWidth);
             }
         }
@@ -138,8 +134,6 @@ namespace ActivityManager.Controls
 
                 if (maxWidth <= timeStamp.Width)
                     maxWidth = timeStamp.Width;
-
-               
             }
             underlay.Children.Clear();
             return maxWidth;
@@ -158,13 +152,12 @@ namespace ActivityManager.Controls
                 BorderColor = Color.Black,
                 Padding = 0,
                 HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Center,
+                VerticalOptions = LayoutOptions.Start,
             };
 
-
             var timestamp = (Label)timeSlot.Content;
-         //   Debug.WriteLine(timestamp.Text + ": " + timeSlot.Y);
-            double startTimeSlot = 0;
+            //   Debug.WriteLine(timestamp.Text + ": " + timeSlot.Y);
+
             //   Debug.WriteLine(timeSlot.X);
             foreach (var activity in ActivityTimeline)
             {
@@ -179,8 +172,6 @@ namespace ActivityManager.Controls
                 string endtimeString = endtime.ToString("HH:mm");
                 if (endtimeString.Equals(timestamp.Text))
                 {
-               
-
                     AbsoluteLayout.SetLayoutFlags(activityFrame, AbsoluteLayoutFlags.None);
 
                     overlay.Children.Add(activityFrame);
@@ -189,7 +180,7 @@ namespace ActivityManager.Controls
                     var width = timeSlot.Width - maxWidth - 10;
                     var height = timeSlot.Y - startTimeSlot;
                     var x = timeSlot.X + maxWidth + 5;
-                    var y = timeSlot.Y;
+                    var y = timeSlot.Y - (height / 2) - 2.5;
 
                     var rect = new Rectangle(x, y, width, height);
 
@@ -206,6 +197,7 @@ namespace ActivityManager.Controls
                             + " - "
                             + endtimeString
                     };
+
                     AbsoluteLayout.SetLayoutBounds(ActivityTextLabel, rect);
 
                     overlay.Children.Add(ActivityTextLabel);
@@ -214,6 +206,10 @@ namespace ActivityManager.Controls
 
                     Debug.WriteLine(activity.Name + ": " + rect.ToString());
                 }
+
+
+
+
             }
         }
 
@@ -229,24 +225,24 @@ namespace ActivityManager.Controls
                         StartTime = DateTime.Parse("01:00"),
                         EndTime = DateTime.Parse("03:00")
                     },
-                    //new ActivityModel
-                    //{
-                    //    Name = "tennis",
-                    //    StartTime = DateTime.Parse("03:20"),
-                    //    EndTime = DateTime.Parse("04:00")
-                    //},
-                    //new ActivityModel
-                    //{
-                    //    Name = "chilling",
-                    //    StartTime = DateTime.Parse("05:07"),
-                    //    EndTime = DateTime.Parse("06:00")
-                    //},
-                    //new ActivityModel
-                    //{
-                    //    Name = "lols",
-                    //    StartTime = DateTime.Parse("12:54"),
-                    //    EndTime = DateTime.Parse("13:30")
-                    //},
+                    new ActivityModel
+                    {
+                        Name = "tennis",
+                        StartTime = DateTime.Parse("03:20"),
+                        EndTime = DateTime.Parse("04:00")
+                    },
+                    new ActivityModel
+                    {
+                        Name = "chilling",
+                        StartTime = DateTime.Parse("05:07"),
+                        EndTime = DateTime.Parse("06:00")
+                    },
+                    new ActivityModel
+                    {
+                        Name = "lols",
+                        StartTime = DateTime.Parse("12:54"),
+                        EndTime = DateTime.Parse("13:30")
+                    },
                 };
 
                 return output;
@@ -257,10 +253,9 @@ namespace ActivityManager.Controls
         {
             StackLayout underlay = new StackLayout()
             {
-                 BackgroundColor = Color.GreenYellow,
+                BackgroundColor = Color.GreenYellow,
                 IsVisible = true,
                 Opacity = 1,
-               
             };
             AbsoluteLayout.SetLayoutFlags(underlay, AbsoluteLayoutFlags.All);
             AbsoluteLayout.SetLayoutBounds(underlay, new Rectangle(0.5, 0.5, 1, 1));
@@ -320,8 +315,6 @@ namespace ActivityManager.Controls
             return absoluteLayout;
         }
 
-
-
         private List<TimeSpan> CreateHourlyTimestamps()
         {
             List<TimeSpan> timeSpans = new List<TimeSpan>();
@@ -352,14 +345,14 @@ namespace ActivityManager.Controls
 
             foreach (var activity in ActivityTimeline)
             {
-                var startTime = TimeSpan.Parse(activity.StartTime.ToString("HH:mm"));
-                var temp = (DateTime)activity.EndTime;
-                var endTime = TimeSpan.Parse(temp.ToString("HH:mm"));
+                //var startTime = TimeSpan.Parse(activity.StartTime.ToString("HH:mm"));
+                //var temp = (DateTime)activity.EndTime;
+                //var endTime = TimeSpan.Parse(temp.ToString("HH:mm"));
 
-                var startIndex = noDuplicates.IndexOf(startTime);
-                var endIndex = noDuplicates.IndexOf(endTime);
+                //var startIndex = noDuplicates.IndexOf(startTime);
+                //var endIndex = noDuplicates.IndexOf(endTime);
 
-                noDuplicates.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
+                //noDuplicates.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
             }
             timeSpans.Clear();
 
@@ -447,7 +440,5 @@ namespace ActivityManager.Controls
         }
 
         #endregion
-
-
     }
 }
