@@ -45,7 +45,7 @@ namespace ActivityManager.Controls
         }
 
         #endregion
-        double startTimeSlot;
+        ContentView ActivityStartTimeSlot;
 
         #region commands
 
@@ -55,6 +55,10 @@ namespace ActivityManager.Controls
 
         #endregion
 
+
+        /// <summary>
+        /// Initiates the actvitiymanagerTimeline
+        /// </summary>
         public ActivityManagerTimeline()
         {
             ButtonAddPressedCommand = new Command(() => AddButtonPressed());
@@ -68,9 +72,12 @@ namespace ActivityManager.Controls
             );
         }
 
+        /// <summary>
+        /// creates the activityTimeline, by first creating the basic structure then creating timestamps & adding activities.
+        /// </summary>
         public void CreateActivityTimeline()
         {
-            // check if layout exists, if it doesn't create basic page structure.
+            // create basic view structure
             AbsoluteLayout absoluteLayout = CreateDefaultContentViewStructure();
             StackLayout underlay = (StackLayout)absoluteLayout.Children.ElementAt(0);
             AbsoluteLayout overlay = (AbsoluteLayout)absoluteLayout.Children.ElementAt(1);
@@ -79,10 +86,15 @@ namespace ActivityManager.Controls
             underlay.Children.Clear();
             overlay.Children.Clear();
 
+            // creates hourlytimestamps, then sorts & adds all the activity start + end timestamps.
             var timeSpans = SortTimeStamps(CreateHourlyTimestamps());
 
+            // gets the highest width needed for timestamps, so we can calculate activity width & avoid overlapping with timestamp
+            // currently just creates the timestamps like the foreach below, can most likely be optimized
             var maxWidth = GetTimeSlotMaxWidth(underlay, timeSpans);
 
+            // loop through the timestamps, create label, bounds etc. & see if an activity needs to be added here.
+            // also needs a more elegant solution, maybe going through underlay.timeslots.labels in a form of search. would be more efficienct
             foreach (var timestamp in timeSpans)
             {
                 ContentView timeSlot = new ContentView
@@ -101,11 +113,12 @@ namespace ActivityManager.Controls
                     Text = timestamp.ToString(@"hh\:mm"),
                     Padding = 0,
                 };
+
                 AbsoluteLayout.SetLayoutFlags(timeStamp, AbsoluteLayoutFlags.None);
                 AbsoluteLayout.SetLayoutBounds(timeStamp, timeSlot.Bounds);
                 timeSlot.Content = timeStamp;
                 underlay.Children.Add(timeSlot);
-                //   Debug.WriteLine(timeSlot.Y);
+
                 CreateActivityFrame(overlay, timeSlot, maxWidth);
             }
         }
@@ -139,12 +152,19 @@ namespace ActivityManager.Controls
             return maxWidth;
         }
 
+        /// <summary>
+        /// create the activity frame
+        /// </summary>
+        /// <param name="overlay"></param>
+        /// <param name="timeSlot"></param>
+        /// <param name="maxWidth"></param>
         private void CreateActivityFrame(
             AbsoluteLayout overlay,
             ContentView timeSlot,
             double maxWidth
         )
         {
+            // make the frame
             Frame activityFrame = new Frame
             {
                 BackgroundColor = Color.White,
@@ -152,40 +172,47 @@ namespace ActivityManager.Controls
                 BorderColor = Color.Black,
                 Padding = 0,
                 HorizontalOptions = LayoutOptions.Center,
-                VerticalOptions = LayoutOptions.Start,
+                VerticalOptions = LayoutOptions.Center,
             };
-
+            // get the current timestamp we are working with from timeslot input
             var timestamp = (Label)timeSlot.Content;
-            //   Debug.WriteLine(timestamp.Text + ": " + timeSlot.Y);
 
-            //   Debug.WriteLine(timeSlot.X);
+            // loop through our activities, might need to rename ActivityTimeline to Activities. could be more readable
             foreach (var activity in ActivityTimeline)
             {
+                // check if the current timestamp equals the startime of our activity, if it does we save that timeslot
                 var startTime = activity.StartTime.ToString("HH:mm");
 
                 if (startTime.Equals(timestamp.Text))
                 {
-                    startTimeSlot = timeSlot.Y;
+                    ActivityStartTimeSlot = timeSlot;
                 }
 
+                // check if the current timeslot equals the endtime of our activity, if it does we create the activity.
                 var endtime = (DateTime)activity.EndTime;
                 string endtimeString = endtime.ToString("HH:mm");
                 if (endtimeString.Equals(timestamp.Text))
                 {
-                    AbsoluteLayout.SetLayoutFlags(activityFrame, AbsoluteLayoutFlags.None);
+                    AbsoluteLayout.SetLayoutFlags(activityFrame, AbsoluteLayoutFlags.YProportional);
 
                     overlay.Children.Add(activityFrame);
 
                     // Activity Frame calculations
                     var width = timeSlot.Width - maxWidth - 10;
-                    var height = timeSlot.Y - startTimeSlot;
+                    var height = timeSlot.Y - ActivityStartTimeSlot.Y;
                     var x = timeSlot.X + maxWidth + 5;
-                    var y = timeSlot.Y - (height / 2) - 2.5;
+                    var y = ActivityStartTimeSlot.Y + ActivityStartTimeSlot.Height;
+
+                    //min height, needs to be moved to the timeslot creation
+                    if (height < 25)
+                        height = 25;
 
                     var rect = new Rectangle(x, y, width, height);
+                    ActivityStartTimeSlot = new ContentView();
 
                     AbsoluteLayout.SetLayoutBounds(activityFrame, rect);
 
+                    // insert the info you want displayed in the activity frame here.
                     Label ActivityTextLabel = new Label
                     {
                         HorizontalOptions = LayoutOptions.Center,
@@ -203,13 +230,7 @@ namespace ActivityManager.Controls
                     overlay.Children.Add(ActivityTextLabel);
 
                     activityFrame.LayoutTo(rect);
-
-                    Debug.WriteLine(activity.Name + ": " + rect.ToString());
                 }
-
-
-
-
             }
         }
 
@@ -240,8 +261,8 @@ namespace ActivityManager.Controls
                     new ActivityModel
                     {
                         Name = "lols",
-                        StartTime = DateTime.Parse("12:54"),
-                        EndTime = DateTime.Parse("13:30")
+                        StartTime = DateTime.Parse("20:54"),
+                        EndTime = DateTime.Parse("03:00")
                     },
                 };
 
@@ -343,17 +364,18 @@ namespace ActivityManager.Controls
             var noDuplicates = timeSpans.Distinct().ToList();
             noDuplicates.Sort((x, y) => TimeSpan.Compare(x, y));
 
-            foreach (var activity in ActivityTimeline)
-            {
-                //var startTime = TimeSpan.Parse(activity.StartTime.ToString("HH:mm"));
-                //var temp = (DateTime)activity.EndTime;
-                //var endTime = TimeSpan.Parse(temp.ToString("HH:mm"));
+            // Uncomment this if you want to remove timestamps between starting & endtime of activities
+            //foreach (var activity in ActivityTimeline)
+            //{
+            //    //var startTime = TimeSpan.Parse(activity.StartTime.ToString("HH:mm"));
+            //    //var temp = (DateTime)activity.EndTime;
+            //    //var endTime = TimeSpan.Parse(temp.ToString("HH:mm"));
 
-                //var startIndex = noDuplicates.IndexOf(startTime);
-                //var endIndex = noDuplicates.IndexOf(endTime);
+            //    //var startIndex = noDuplicates.IndexOf(startTime);
+            //    //var endIndex = noDuplicates.IndexOf(endTime);
 
-                //noDuplicates.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
-            }
+            //    //noDuplicates.RemoveRange(startIndex + 1, endIndex - startIndex - 1);
+            //}
             timeSpans.Clear();
 
             foreach (var timeSpan in noDuplicates)
@@ -386,7 +408,7 @@ namespace ActivityManager.Controls
                 new ActivityModel
                 {
                     Name = "test",
-                    StartTime = DateTime.Parse("15:25"),
+                    StartTime = DateTime.Parse("13:25"),
                     EndTime = DateTime.Parse("16:01")
                 }
             );
