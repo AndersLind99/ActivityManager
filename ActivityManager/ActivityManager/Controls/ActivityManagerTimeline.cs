@@ -158,15 +158,10 @@ namespace ActivityManager.Controls
         /// <param name="overlay"></param>
         /// <param name="timeSlot"></param>
         /// <param name="maxWidth"></param>
-        private void CreateActivityFrame(
-            AbsoluteLayout overlay,
-            ContentView timeSlot,
-            double maxWidth
-        )
+        private void CreateActivityFrame(AbsoluteLayout overlay,ContentView timeSlot,double maxWidth)
         {
             // make the frame
-            Frame activityFrame = new Frame
-            {
+            Frame activityFrame = new Frame {
                 BackgroundColor = Color.White,
                 CornerRadius = 5,
                 BorderColor = Color.Black,
@@ -178,11 +173,9 @@ namespace ActivityManager.Controls
             var timestamp = (Label)timeSlot.Content;
 
             // loop through our activities, might need to rename ActivityTimeline to Activities. could be more readable
-            foreach (var activity in ActivityTimeline)
-            {
+            foreach (var activity in ActivityTimeline)  {
                 // check if the current timestamp equals the startime of our activity, if it does we save that timeslot
                 var startTime = activity.StartTime.ToString("HH:mm");
-
                 if (startTime.Equals(timestamp.Text))
                 {
                     ActivityStartTimeSlot = timeSlot;
@@ -226,9 +219,7 @@ namespace ActivityManager.Controls
                     };
 
                     AbsoluteLayout.SetLayoutBounds(ActivityTextLabel, rect);
-
                     overlay.Children.Add(ActivityTextLabel);
-
                     activityFrame.LayoutTo(rect);
                 }
             }
@@ -255,14 +246,14 @@ namespace ActivityManager.Controls
                     new ActivityModel
                     {
                         Name = "chilling",
-                        StartTime = DateTime.Parse("05:07"),
-                        EndTime = DateTime.Parse("06:00")
+                        StartTime = DateTime.Parse("10:07"),
+                        EndTime = DateTime.Parse("11:55")
                     },
                     new ActivityModel
                     {
                         Name = "lols",
-                        StartTime = DateTime.Parse("20:54"),
-                        EndTime = DateTime.Parse("03:00")
+                        StartTime = DateTime.Parse("13:54"),
+                        EndTime = DateTime.Parse("15:02")
                     },
                 };
 
@@ -401,14 +392,14 @@ namespace ActivityManager.Controls
                 {
                     Name = "test",
                     StartTime = DateTime.Parse("13:45"),
-                    EndTime = DateTime.Parse("14:22")
+                    EndTime = DateTime.Parse("13:50")
                 }
             );
             ActivityTimeline.Add(
                 new ActivityModel
                 {
                     Name = "test",
-                    StartTime = DateTime.Parse("13:25"),
+                    StartTime = DateTime.Parse("14:25"),
                     EndTime = DateTime.Parse("16:01")
                 }
             );
